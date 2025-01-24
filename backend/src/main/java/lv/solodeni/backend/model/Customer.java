@@ -3,6 +3,7 @@ package lv.solodeni.backend.model;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lv.solodeni.backend.exception.NullObjectException;
 
@@ -11,13 +12,13 @@ import java.util.*;
 @Entity
 @Table(name = "customers")
 @Data
+@NoArgsConstructor
 public class Customer {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Setter(value = AccessLevel.NONE)
-    @Column(length = 36)
-    private UUID id;
+    private Long id;
 
     @Column(nullable = false, length = 50)
     private String firstName;

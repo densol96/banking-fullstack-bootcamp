@@ -5,17 +5,20 @@ import java.util.Arrays;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 import lv.solodeni.backend.model.Account;
 import lv.solodeni.backend.model.Customer;
 import lv.solodeni.backend.model.Transaction;
 import lv.solodeni.backend.model.enums.Status;
+import lv.solodeni.backend.model.enums.TransactionType;
 import lv.solodeni.backend.repository.ICustomerRepo;
 import lv.solodeni.backend.repository.ITransactionRepo;
 
 @Configuration
 public class DataInitializerConfig {
     @Bean
+    @Profile("set_up")
     public CommandLineRunner seedInitialDataInDatabase(ICustomerRepo customerRepo, ITransactionRepo transactionRepo) {
         return args -> {
             Customer customer1 = new Customer("Deniss", "Solovjovs", "solodeni@test.com", "password123");
@@ -31,11 +34,11 @@ public class DataInitializerConfig {
             customerRepo.save(customer2);
 
             Transaction tr1 = new Transaction(cutomer1Account, cutomer2Account, 50.0,
-                    Status.SUCCESS);
+                    Status.SUCCESS, TransactionType.TRANSFER);
             Transaction tr2 = new Transaction(cutomer1Account, cutomer2Account, 150.0,
-                    Status.SUCCESS);
+                    Status.SUCCESS, TransactionType.TRANSFER);
             Transaction tr3 = new Transaction(cutomer2Account, cutomer1Account, 50.0,
-                    Status.SUCCESS);
+                    Status.SUCCESS, TransactionType.TRANSFER);
 
             transactionRepo.saveAll(Arrays.asList(tr1, tr2, tr3));
             System.out.println("======> " + customer1.getId().toString());

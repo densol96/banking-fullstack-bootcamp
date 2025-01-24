@@ -17,4 +17,4 @@ volumes:
   my-db:
 
 
-# docker exec -it <container_name>
+# docker exec -it db_2_homework-db-1 mysql -p
