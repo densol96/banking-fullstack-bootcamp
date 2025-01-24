@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Setter;
+import lv.solodeni.backend.exception.NullObjectException;
 
 import java.util.*;
 
@@ -15,6 +16,7 @@ public class Customer {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Setter(value = AccessLevel.NONE)
+    @Column(length = 36)
     private UUID id;
 
     @Column(nullable = false, length = 50)
@@ -37,5 +39,13 @@ public class Customer {
         this.lastName = lastName;
         this.email = email;
         this.password = password;
+    }
+
+    public void addAccount(Account account) throws Exception {
+        if (account == null)
+            throw new NullObjectException("To add acount it should not be a null");
+        if (accounts == null)
+            accounts = new ArrayList<Account>();
+        accounts.add(account);
     }
 }

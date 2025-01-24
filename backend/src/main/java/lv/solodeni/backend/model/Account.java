@@ -16,7 +16,7 @@ import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Setter;
-import lv.solodeni.exception.InvalidAmountException;
+import lv.solodeni.backend.exception.InvalidAmountException;
 
 @Entity
 @Table(name = "accounts")
@@ -25,6 +25,7 @@ public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Setter(value = AccessLevel.NONE)
+    @Column(length = 36)
     private UUID id;
 
     @Column(nullable = false)

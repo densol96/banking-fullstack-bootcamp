@@ -12,9 +12,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+
 import lombok.Data;
+
 import lv.solodeni.backend.model.enums.Status;
 
 @Entity
@@ -24,6 +25,7 @@ public class Transaction {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(length = 36)
     private UUID id;
 
     @ManyToOne
