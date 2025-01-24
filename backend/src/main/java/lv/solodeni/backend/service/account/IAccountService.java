@@ -9,4 +9,6 @@ public interface IAccountService {
     BalanceDto deposit(Long accountId, OperationAmountDto amountDto);
 
     BalanceDto withdraw(Long accountId, OperationAmountDto amountDto);
+
+    BalanceDto transfer(Long fromAccountId, String toAccountNumber, OperationAmountDto amountDto);
 }

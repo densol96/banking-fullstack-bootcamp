@@ -3,6 +3,9 @@ package lv.solodeni.backend.model;
 import java.util.List;
 import java.util.UUID;
 
+import org.hibernate.annotations.Type;
+import org.hibernate.validator.constraints.Length;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -49,9 +52,6 @@ public class Account {
 
     @OneToMany(mappedBy = "toAccount", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Transaction> receivedTransactions;
-
-    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Transaction> operationHistory;
 
     public Account(Double balance, Customer customer) {
         this.balance = balance;
