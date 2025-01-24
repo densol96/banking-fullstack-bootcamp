@@ -61,17 +61,21 @@ public class Transaction {
     @Column(nullable = false)
     private Status status;
 
+    private String errorMessage;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private TransactionType type;
 
-    public Transaction(Account fromAccount, Account toAccount, Double amount, Status status, TransactionType type) {
+    public Transaction(Account fromAccount, Account toAccount, Double amount, Status status, TransactionType type,
+            String errorMessage) {
         this.fromAccount = fromAccount;
         this.toAccount = toAccount;
         this.amount = amount;
         this.transactionDateTime = LocalDateTime.now();
         this.status = status;
         this.type = type;
+        this.errorMessage = errorMessage;
     }
 
 }

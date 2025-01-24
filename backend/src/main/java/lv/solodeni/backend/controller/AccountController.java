@@ -15,6 +15,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lv.solodeni.backend.model.dto.BalanceDto;
 import lv.solodeni.backend.model.dto.OperationAmountDto;
+import lv.solodeni.backend.model.dto.TransferDto;
 import lv.solodeni.backend.service.account.IAccountService;
 
 @RestController
@@ -38,6 +39,12 @@ public class AccountController {
     @PostMapping("/{accountId}/withdraw")
     public ResponseEntity<BalanceDto> withdraw(@PathVariable Long accountId,
             @Valid @RequestBody OperationAmountDto amountDto) {
-        return new ResponseEntity<>(accountService.deposit(accountId, amountDto), HttpStatus.CREATED);
+        return new ResponseEntity<>(accountService.withdraw(accountId, amountDto), HttpStatus.CREATED);
+    }
+
+    @PostMapping("/{accountId}/transfer")
+    public ResponseEntity<BalanceDto> transfer(@PathVariable Long accountId,
+            @Valid @RequestBody TransferDto amountDto) {
+        return new ResponseEntity<>(accountService.transfer(accountId, amountDto), HttpStatus.CREATED);
     }
 }

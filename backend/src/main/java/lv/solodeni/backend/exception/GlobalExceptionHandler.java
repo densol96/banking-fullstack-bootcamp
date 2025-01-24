@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingPathVariableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -41,8 +42,8 @@ public class GlobalExceptionHandler {
                 HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler({ NoResourceFoundException.class })
-    public ResponseEntity<ErrorDto> handleNoResourceFoundException(NoResourceFoundException e) {
+    @ExceptionHandler({ NoResourceFoundException.class, HttpRequestMethodNotSupportedException.class })
+    public ResponseEntity<ErrorDto> handleNoResourceFoundException(Exception e) {
         return new ResponseEntity<>(new ErrorDto(e.getMessage()),
                 HttpStatus.NOT_FOUND);
     }
@@ -59,6 +60,11 @@ public class GlobalExceptionHandler {
         bindingResult.getFieldErrors().stream()
                 .forEach(fieldError -> fieldsAndMessages.put(fieldError.getField(), fieldError.getDefaultMessage()));
         return new ResponseEntity<>(new ValidationErrorResponse("failure", fieldsAndMessages), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(InsufficientFundsException.class)
+    public ResponseEntity<Object> handleInsufficientFundsException(InsufficientFundsException e) {
+        return new ResponseEntity<>(new ErrorDto(e.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
 }
