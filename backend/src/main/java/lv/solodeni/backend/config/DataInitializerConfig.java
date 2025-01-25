@@ -12,6 +12,7 @@ import lv.solodeni.backend.model.Customer;
 import lv.solodeni.backend.model.Transaction;
 import lv.solodeni.backend.model.enums.Status;
 import lv.solodeni.backend.model.enums.TransactionType;
+import lv.solodeni.backend.model.enums.UserRole;
 import lv.solodeni.backend.repository.ICustomerRepo;
 import lv.solodeni.backend.repository.ITransactionRepo;
 
@@ -26,6 +27,7 @@ public class DataInitializerConfig {
                     .lastName("Solovjovs")
                     .email("solo@deni.com")
                     .password("password123")
+                    .role(UserRole.CUSTOMER)
                     .build();
 
             Customer customer2 = Customer.builder()
@@ -33,6 +35,7 @@ public class DataInitializerConfig {
                     .lastName("Customer")
                     .email("newuser@test.com")
                     .password("password123")
+                    .role(UserRole.CUSTOMER)
                     .build();
 
             Account cutomer1Account = new Account(100.0, customer1);
