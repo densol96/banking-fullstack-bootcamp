@@ -16,6 +16,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import lv.solodeni.backend.model.dto.ErrorDto;
+import lv.solodeni.backend.model.dto.ValidationErrorResponse;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {

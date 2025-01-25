@@ -1,45 +1,34 @@
 package lv.solodeni.backend.model;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
+
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+
+import lombok.experimental.SuperBuilder;
 import lv.solodeni.backend.exception.NullObjectException;
+import lv.solodeni.backend.model.enums.UserRole;
 
 import java.util.*;
 
 @Entity
 @Table(name = "customers")
 @Data
+@EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
-public class Customer {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Setter(value = AccessLevel.NONE)
-    private Long id;
-
-    @Column(nullable = false, length = 50)
-    private String firstName;
-
-    @Column(nullable = false, length = 50)
-    private String lastName;
-
-    @Column(nullable = false, unique = true)
-    private String email;
-
-    @Column(nullable = false)
-    private String password; // This will be a hashed password
+@SuperBuilder
+public class Customer extends User {
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
     private List<Account> accounts;
 
-    public Customer(String firstName, String lastName, String email, String password) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-        this.password = password;
+    @PrePersist
+    @PreUpdate
+    private void validateRole() {
+        if (getRole() != UserRole.CUSTOMER) {
+            throw new IllegalArgumentException("Role must be CUSTOMER for Customer entity.");
+        }
     }
 
     public void addAccount(Account account) throws Exception {

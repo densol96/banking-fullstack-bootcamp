@@ -1,4 +1,4 @@
-package lv.solodeni.backend.exception;
+package lv.solodeni.backend.model.dto;
 
 import java.util.Map;
 
