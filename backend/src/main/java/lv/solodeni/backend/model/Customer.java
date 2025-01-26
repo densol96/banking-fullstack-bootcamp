@@ -1,7 +1,7 @@
 package lv.solodeni.backend.model;
 
 import jakarta.persistence.*;
-
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -20,8 +20,9 @@ import java.util.*;
 @SuperBuilder
 public class Customer extends User {
 
-    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
-    private List<Account> accounts = new ArrayList<>();;
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @Builder.Default
+    private List<Account> accounts = new ArrayList<>();
 
     @PrePersist
     @PreUpdate

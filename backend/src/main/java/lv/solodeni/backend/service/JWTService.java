@@ -41,7 +41,7 @@ public class JWTService {
                 .add(claims)
                 .subject(email)
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60)) // 1 minute for now
+                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 10)) // 10 minute for now
                 .and()
                 .signWith(getKey())
                 .compact();
@@ -72,6 +72,8 @@ public class JWTService {
     }
 
     public boolean isTokenExpired(String token) {
+        // .parseSignedClaims(token) does verification therefore this emthod is
+        // redundant
         return extractExpiration(token).before(new Date());
     }
 

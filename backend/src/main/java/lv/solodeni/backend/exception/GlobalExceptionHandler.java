@@ -7,6 +7,8 @@ import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -95,5 +97,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({ EmailNotFoundException.class, PasswordMismatchException.class })
     public ResponseEntity<ErrorDto> handleAuthenticationExceptions(RuntimeException e) {
         return new ResponseEntity<>(new ErrorDto(e.getMessage()), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ErrorDto> handleAuthenticationException(AuthenticationException e) {
+        String msg = e.getClass() == BadCredentialsException.class
+                ? "Invalid password. Try to restore password if forgot."
+                : e.getMessage();
+        return new ResponseEntity<>(new ErrorDto(msg), HttpStatus.BAD_REQUEST);
     }
 }

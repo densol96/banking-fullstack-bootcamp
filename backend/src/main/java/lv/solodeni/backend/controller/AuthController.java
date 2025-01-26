@@ -11,6 +11,7 @@ import lv.solodeni.backend.model.dto.request.SignInCredentialsDto;
 import lv.solodeni.backend.model.dto.response.BalanceDto;
 import lv.solodeni.backend.model.dto.response.RegisterResponseDto;
 import lv.solodeni.backend.model.dto.response.SignInResponseDto;
+import lv.solodeni.backend.model.dto.response.UserDto;
 import lv.solodeni.backend.service.customer.ICustomerService;
 import lv.solodeni.backend.service.user.IUserService;
 
@@ -43,6 +44,11 @@ public class AuthController {
     @PostMapping("/users/sign-in")
     public ResponseEntity<SignInResponseDto> registerEmployee(@Valid @RequestBody SignInCredentialsDto userData) {
         return new ResponseEntity<>(userService.signIn(userData), HttpStatus.OK);
+    }
+
+    @GetMapping("/users/iam")
+    public ResponseEntity<UserDto> getIdentty() {
+        return new ResponseEntity<>(userService.getIdentity(), HttpStatus.OK);
     }
 
 }
