@@ -47,9 +47,4 @@ public class AccountController {
             @Valid @RequestBody TransferDto amountDto) {
         return new ResponseEntity<>(accountService.transfer(accountId, amountDto), HttpStatus.CREATED);
     }
-
-    @GetMapping("/test")
-    public String test() {
-        return "TESTING ACCOUNTS";
-    }
 }

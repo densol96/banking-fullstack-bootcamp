@@ -18,17 +18,22 @@ export const Deposit: React.FC<Props> = () => {
       const response = await axios.post(
         API_ENDPOINT,
         { amount },
-        headersWithToken("hadasdsdads")
+        headersWithToken(jwt)
       );
       refreshUser();
       toast.success(response.data.message);
     } catch (e) {
-      console.log(e);
+      const errors =
+        e.response?.data?.errors &&
+        (Object.values(e.response?.data?.errors) as string[]);
       toast.error(
-        <p style={{ textAlign: "center" }}>
-          {e.response?.data?.message || "Something went wrong.."}
-        </p>
+        <div style={{ textAlign: "center" }}>
+          {e.response?.data?.message ||
+            (errors && errors?.map((err) => <p>{err}</p>)) ||
+            "Something went wrong..."}
+        </div>
       );
+      throw e;
     }
   }
 

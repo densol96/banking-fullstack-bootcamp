@@ -57,7 +57,7 @@ const UserProvider: React.FC<Props> = ({ children }) => {
 
   useEffect(() => {
     identifyJwt();
-  }, [jwt]);
+  }, [jwt, trigger]);
 
   return (
     <UserContext.Provider value={{ user, updateJwt, logout, refreshUser, jwt }}>

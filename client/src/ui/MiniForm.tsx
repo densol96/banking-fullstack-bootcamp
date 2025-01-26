@@ -41,7 +41,7 @@ type Props = {
   heading: string;
   color: string;
   icon: React.ReactNode;
-  onSubmit: (amount: number) => void;
+  onSubmit: (amount: number) => Promise<void>;
 };
 
 export const MiniForm: React.FC<Props> = ({
@@ -56,9 +56,12 @@ export const MiniForm: React.FC<Props> = ({
     <Container color={color}>
       <Heading as="h2">{heading}</Heading>
       <ActionForm
-        onSubmit={(e) => {
+        onSubmit={async (e) => {
           e.preventDefault();
-          onSubmit(value);
+          try {
+            await onSubmit(value);
+            setValue(0);
+          } catch (e) {}
         }}
       >
         <input

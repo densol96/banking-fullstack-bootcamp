@@ -47,8 +47,9 @@ public class JwtFilter extends OncePerRequestFilter {
                     }
                 }
             }
-        } catch (MalformedJwtException e) {
+        } catch (Exception e) {
             // in case there is a malformed token provided for a permitted resource
+            System.out.println("JWT caused exception " + e.getClass().getSimpleName());
         }
 
         filterChain.doFilter(request, response);

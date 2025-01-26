@@ -17,7 +17,6 @@ import lv.solodeni.backend.service.user.IUserService;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -50,10 +49,4 @@ public class AuthController {
     public ResponseEntity<UserDto> getIdentty() {
         return new ResponseEntity<>(userService.getIdentity(), HttpStatus.OK);
     }
-
-    @GetMapping("/test")
-    public String test() {
-        return "TESTING AUTH";
-    }
-
 }
