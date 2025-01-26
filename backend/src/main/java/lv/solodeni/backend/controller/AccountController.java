@@ -21,7 +21,6 @@ import lv.solodeni.backend.service.account.IAccountService;
 @RestController
 @RequestMapping("/api/v1/accounts")
 @RequiredArgsConstructor
-@CrossOrigin(origins = { "http://localhost:3000", "http://127.0.0.1:3000" })
 public class AccountController {
 
     private final IAccountService accountService;
@@ -47,5 +46,10 @@ public class AccountController {
     public ResponseEntity<BalanceDto> transfer(@PathVariable Long accountId,
             @Valid @RequestBody TransferDto amountDto) {
         return new ResponseEntity<>(accountService.transfer(accountId, amountDto), HttpStatus.CREATED);
+    }
+
+    @GetMapping("/test")
+    public String test() {
+        return "TESTING ACCOUNTS";
     }
 }

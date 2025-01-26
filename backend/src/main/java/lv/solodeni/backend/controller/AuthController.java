@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lv.solodeni.backend.exception.FeatureNotAvailableYetException;
 import lv.solodeni.backend.model.dto.request.CustomerRegistrationDto;
 import lv.solodeni.backend.model.dto.request.SignInCredentialsDto;
-import lv.solodeni.backend.model.dto.response.BalanceDto;
+
 import lv.solodeni.backend.model.dto.response.RegisterResponseDto;
 import lv.solodeni.backend.model.dto.response.SignInResponseDto;
 import lv.solodeni.backend.model.dto.response.UserDto;
@@ -25,7 +25,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
-@CrossOrigin(origins = { "http://localhost:3000", "http://127.0.0.1:3000" })
 public class AuthController {
 
     private final ICustomerService customerService;
@@ -50,6 +49,11 @@ public class AuthController {
     @GetMapping("/users/iam")
     public ResponseEntity<UserDto> getIdentty() {
         return new ResponseEntity<>(userService.getIdentity(), HttpStatus.OK);
+    }
+
+    @GetMapping("/test")
+    public String test() {
+        return "TESTING AUTH";
     }
 
 }

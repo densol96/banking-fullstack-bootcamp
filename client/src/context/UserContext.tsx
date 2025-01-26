@@ -1,25 +1,29 @@
-import React, {
-  useCallback,
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 
 import useLocalStorageAsState from "../hooks/useLocalStorageAsState";
 import { Spinner } from "../ui/Spinner";
 import { User } from "../types/User";
 import axios from "axios";
 
-type UserContextType = { user: User | null };
+type UserContextType = {
+  user: User | null;
+  logout: () => void;
+  updateJwt: (jwt: string) => void;
+  refreshUser: () => void;
+  jwt: string;
+};
 
-const UserContext = createContext<UserContextType>({ user: null });
+const UserContext = createContext<UserContextType>({
+  user: null,
+  logout: () => {},
+  updateJwt: (jwt: string) => {},
+  refreshUser: () => {},
+  jwt: "",
+});
 
 type Props = {
   children?: React.ReactNode;
 };
-
-const API_ENDPOINT = "http://localhost:8080/api/v1/auth/users/iam";
 
 const UserProvider: React.FC<Props> = ({ children }) => {
   let {
@@ -30,8 +34,14 @@ const UserProvider: React.FC<Props> = ({ children }) => {
 
   const [user, setUser] = useState<User | null>(null);
   const [isReady, setIsReady] = useState(false);
+  const [trigger, setTrigger] = useState<boolean>(true);
+
+  function refreshUser() {
+    setTrigger(!trigger);
+  }
 
   async function identifyJwt() {
+    const API_ENDPOINT = `${process.env.REACT_APP_API_URL}/auth/users/iam`;
     try {
       const response = await axios.get(API_ENDPOINT, {
         headers: {
@@ -50,7 +60,7 @@ const UserProvider: React.FC<Props> = ({ children }) => {
   }, [jwt]);
 
   return (
-    <UserContext.Provider value={{ user }}>
+    <UserContext.Provider value={{ user, updateJwt, logout, refreshUser, jwt }}>
       {!isReady ? <Spinner /> : children}
     </UserContext.Provider>
   );

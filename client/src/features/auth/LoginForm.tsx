@@ -1,48 +1,61 @@
-import React from "react";
-import styled from "styled-components";
 import { FormLine } from "../../ui/FormLine";
 import { Form } from "../../ui/Form";
-import { Link } from "react-router-dom";
-
-const Button = styled.button`
-  display: inline-block;
-  background-color: var(--color-primary);
-  font-size: 1.6rem;
-  font-family: inherit;
-  font-weight: 500;
-  border: none;
-  padding: 1.25rem 4.5rem;
-  border-radius: 10rem;
-  cursor: pointer;
-  transition: all 0.3s;
-
-  &:hover {
-    transform: translateY(-2px);
-  }
-`;
-
-const StyledLink = styled(Link)`
-  text-decoration: underline;
-
-  &:hover {
-    text-decoration: none;
-  }
-`;
+import { Button } from "../../ui/Button";
+import { AppLink } from "../../ui/AppLink";
+import { useState } from "react";
+import axios from "axios";
+import { useUserContext } from "../../context/UserContext";
+import toast from "react-hot-toast";
+import { Navigate } from "react-router";
 
 export const LoginForm = () => {
+  const [email, setEmail] = useState("solo@deni.com");
+  const [password, setPassword] = useState("Password123!");
+
+  const { user, logout, updateJwt } = useUserContext();
+
+  async function login(e) {
+    e.preventDefault();
+    const API_ENDPOINT = `${process.env.REACT_APP_API_URL}/auth/users/sign-in`;
+    try {
+      const response = await axios.post(API_ENDPOINT, { email, password });
+      updateJwt(response.data.jwt);
+      toast.success(response.data.message);
+    } catch (e) {
+      console.log(e);
+      toast.error(
+        <p style={{ textAlign: "center" }}>
+          {e.response?.data?.message || "Something went wrong.."}
+        </p>
+      );
+    }
+  }
+
+  if (user) return <Navigate to="/" />;
+
   return (
-    <Form>
+    <Form onSubmit={login}>
       <FormLine>
         <label>Email</label>
-        <input type="text" />
+        <input
+          name="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          type="text"
+        />
       </FormLine>
       <FormLine>
         <label>Password</label>
-        <input type="password" />
+        <input
+          name="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          type="password"
+        />
       </FormLine>
       <Button>Submit</Button>
-      <StyledLink to="/forgot">Forgot password</StyledLink>
-      <StyledLink to="/forgot">Create account</StyledLink>
+      <AppLink to="/forgot-password">Forgot password</AppLink>
+      <AppLink to="/register">Create account</AppLink>
     </Form>
   );
 };

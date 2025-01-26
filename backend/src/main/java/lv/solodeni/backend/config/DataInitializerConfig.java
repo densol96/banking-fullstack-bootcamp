@@ -40,20 +40,24 @@ public class DataInitializerConfig {
                                         .role(UserRole.CUSTOMER)
                                         .build();
 
-                        Account cutomer1Account = new Account(100.0, customer1);
+                        Account cutomer1Account1 = new Account(100.0, customer1);
+                        Account cutomer1Account2 = new Account(50.0, customer1);
+
                         Account cutomer2Account = new Account(100.0, customer2);
 
-                        customer1.addAccount(cutomer1Account);
+                        customer1.addAccount(cutomer1Account1);
+                        customer1.addAccount(cutomer1Account2);
+
                         customer2.addAccount(cutomer2Account);
 
                         customerRepo.save(customer1);
                         customerRepo.save(customer2);
 
-                        Transaction tr1 = new Transaction(cutomer1Account, cutomer2Account, 50.0,
+                        Transaction tr1 = new Transaction(cutomer1Account1, cutomer2Account, 50.0,
                                         Status.SUCCESS, TransactionType.TRANSFER, null);
-                        Transaction tr2 = new Transaction(cutomer1Account, cutomer2Account, 150.0,
+                        Transaction tr2 = new Transaction(cutomer1Account1, cutomer2Account, 150.0,
                                         Status.SUCCESS, TransactionType.TRANSFER, null);
-                        Transaction tr3 = new Transaction(cutomer2Account, cutomer1Account, 50.0,
+                        Transaction tr3 = new Transaction(cutomer2Account, cutomer1Account1, 50.0,
                                         Status.SUCCESS, TransactionType.TRANSFER, null);
 
                         transactionRepo.saveAll(Arrays.asList(tr1, tr2, tr3));

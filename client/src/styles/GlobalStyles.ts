@@ -12,6 +12,7 @@ const GlobalStyles = createGlobalStyle`:root {
   --color-tertiary-opacity: #ff58602d;
   --gradient-primary: linear-gradient(to top left, #39b385, #9be15d);
   --gradient-secondary: linear-gradient(to top left, #ffb003, #ffcb03);
+  --gradient-tertiary: linear-gradient(to top left, #fd424b, #ff58602d);
 }
 
 * {
