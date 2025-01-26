@@ -15,9 +15,9 @@ import lv.solodeni.backend.exception.InvalidIdException;
 import lv.solodeni.backend.exception.InvalidToAcountNumber;
 import lv.solodeni.backend.model.Account;
 import lv.solodeni.backend.model.Transaction;
-import lv.solodeni.backend.model.dto.BalanceDto;
-import lv.solodeni.backend.model.dto.OperationAmountDto;
-import lv.solodeni.backend.model.dto.TransferDto;
+import lv.solodeni.backend.model.dto.request.OperationAmountDto;
+import lv.solodeni.backend.model.dto.request.TransferDto;
+import lv.solodeni.backend.model.dto.response.BalanceDto;
 import lv.solodeni.backend.model.enums.Status;
 import lv.solodeni.backend.model.enums.TransactionType;
 import lv.solodeni.backend.repository.IAccountRepo;
@@ -133,7 +133,7 @@ public class AccountServiceImpl implements IAccountService {
                 throw e;
             }
         } else {
-            return new BalanceDto("failure", null, "Transfers to other bankings systems is not available yet");
+            return new BalanceDto(Status.FAILURE, null, "Transfers to other bankings systems is not available yet");
         }
     }
 

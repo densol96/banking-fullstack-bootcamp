@@ -21,7 +21,7 @@ import java.util.*;
 public class Customer extends User {
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
-    private List<Account> accounts;
+    private List<Account> accounts = new ArrayList<>();;
 
     @PrePersist
     @PreUpdate
@@ -34,8 +34,6 @@ public class Customer extends User {
     public void addAccount(Account account) throws Exception {
         if (account == null)
             throw new NullObjectException("To add acount it should not be a null");
-        if (accounts == null)
-            accounts = new ArrayList<Account>();
         accounts.add(account);
     }
 }

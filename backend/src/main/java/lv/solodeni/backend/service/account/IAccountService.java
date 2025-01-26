@@ -1,8 +1,8 @@
 package lv.solodeni.backend.service.account;
 
-import lv.solodeni.backend.model.dto.BalanceDto;
-import lv.solodeni.backend.model.dto.OperationAmountDto;
-import lv.solodeni.backend.model.dto.TransferDto;
+import lv.solodeni.backend.model.dto.request.OperationAmountDto;
+import lv.solodeni.backend.model.dto.request.TransferDto;
+import lv.solodeni.backend.model.dto.response.BalanceDto;
 
 public interface IAccountService {
     BalanceDto displayBalance(Long accountId);

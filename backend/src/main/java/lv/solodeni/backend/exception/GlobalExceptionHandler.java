@@ -1,5 +1,6 @@
 package lv.solodeni.backend.exception;
 
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -15,8 +16,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
-import lv.solodeni.backend.model.dto.ErrorDto;
-import lv.solodeni.backend.model.dto.ValidationErrorResponse;
+import lv.solodeni.backend.model.dto.response.ErrorDto;
+import lv.solodeni.backend.model.dto.response.ValidationErrorResponse;
+import lv.solodeni.backend.model.enums.Status;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -50,7 +52,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<Object> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
+    public ResponseEntity<ErrorDto> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
         return new ResponseEntity<>(new ErrorDto("Required request body is missing"), HttpStatus.BAD_REQUEST);
     }
 
@@ -60,12 +62,38 @@ public class GlobalExceptionHandler {
         Map<String, String> fieldsAndMessages = new LinkedHashMap<>();
         bindingResult.getFieldErrors().stream()
                 .forEach(fieldError -> fieldsAndMessages.put(fieldError.getField(), fieldError.getDefaultMessage()));
-        return new ResponseEntity<>(new ValidationErrorResponse("failure", fieldsAndMessages), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(new ValidationErrorResponse(Status.FAILURE, fieldsAndMessages),
+                HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(InsufficientFundsException.class)
-    public ResponseEntity<Object> handleInsufficientFundsException(InsufficientFundsException e) {
+    public ResponseEntity<ErrorDto> handleInsufficientFundsException(InsufficientFundsException e) {
         return new ResponseEntity<>(new ErrorDto(e.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(FeatureNotAvailableYetException.class)
+    public ResponseEntity<ErrorDto> handleFeatureNotAvailableYetException(FeatureNotAvailableYetException e) {
+        return new ResponseEntity<>(new ErrorDto(e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(PasswordsNotMatchException.class)
+    public ResponseEntity<ErrorDto> handlePasswordNotMatchException(PasswordsNotMatchException e) {
+        return new ResponseEntity<>(new ErrorDto(e.getMessage()), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(SQLIntegrityConstraintViolationException.class)
+    public ResponseEntity<ErrorDto> handlePasswordNotMatchException(SQLIntegrityConstraintViolationException e) {
+        String msg = e.getMessage().split(" for key")[0];
+        return new ResponseEntity<>(new ErrorDto(msg), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(EmailAlreadyExistsException.class)
+    public ResponseEntity<ErrorDto> handleEmailAlreadyExistsException(EmailAlreadyExistsException e) {
+        return new ResponseEntity<>(new ErrorDto(e.getMessage()), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler({ EmailNotFoundException.class, PasswordMismatchException.class })
+    public ResponseEntity<ErrorDto> handleAuthenticationExceptions(RuntimeException e) {
+        return new ResponseEntity<>(new ErrorDto(e.getMessage()), HttpStatus.BAD_REQUEST);
+    }
 }

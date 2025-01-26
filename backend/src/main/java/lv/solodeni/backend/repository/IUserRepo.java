@@ -8,4 +8,6 @@ import lv.solodeni.backend.model.User;
 
 public interface IUserRepo extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
+
+    Boolean existsByEmail(String email);
 }

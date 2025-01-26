@@ -2,20 +2,20 @@ package lv.solodeni.backend.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
+
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lv.solodeni.backend.model.dto.BalanceDto;
-import lv.solodeni.backend.model.dto.OperationAmountDto;
-import lv.solodeni.backend.model.dto.TransferDto;
+import lv.solodeni.backend.model.dto.request.OperationAmountDto;
+import lv.solodeni.backend.model.dto.request.TransferDto;
+import lv.solodeni.backend.model.dto.response.BalanceDto;
 import lv.solodeni.backend.service.account.IAccountService;
 
 @RestController
