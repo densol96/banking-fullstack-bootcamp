@@ -1,0 +1,12 @@
+{
+    "compilerOptions": {
+      "types": ["node"],
+      "baseUrl": "./src",
+      "paths": {
+        "@/*": ["./*"]
+      },
+      "jsx": "react-jsx",
+      "esModuleInterop": true,
+      "allowSyntheticDefaultImports": true,
+    }
+}
