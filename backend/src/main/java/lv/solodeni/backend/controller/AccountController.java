@@ -47,4 +47,11 @@ public class AccountController {
             @Valid @RequestBody TransferDto amountDto) {
         return new ResponseEntity<>(accountService.transfer(accountId, amountDto), HttpStatus.CREATED);
     }
+
+    @PostMapping("/{accountId}/create")
+    public ResponseEntity<BalanceDto> create(@PathVariable Long accountId,
+            @Valid @RequestBody TransferDto amountDto) {
+        return new ResponseEntity<>(accountService.transfer(accountId, amountDto), HttpStatus.CREATED);
+    }
+
 }

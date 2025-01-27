@@ -24,6 +24,7 @@ import lv.solodeni.backend.exception.FeatureNotAvailableYetException;
 import lv.solodeni.backend.exception.InsufficientFundsException;
 import lv.solodeni.backend.exception.InvalidIdException;
 import lv.solodeni.backend.exception.InvalidUserRoleException;
+import lv.solodeni.backend.exception.MaximumAccountLimitException;
 import lv.solodeni.backend.exception.PasswordMismatchException;
 import lv.solodeni.backend.exception.PasswordsNotMatchException;
 import lv.solodeni.backend.model.dto.response.ErrorDto;
@@ -120,10 +121,9 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(new ErrorDto(e.getMessage()), HttpStatus.FORBIDDEN);
     }
 
-    // @ExceptionHandler(InvalidUserRoleException.class)
-    // public ResponseEntity<ErrorDto>
-    // handleInvalidUserRoleException(InvalidUserRoleException e) {
-    // return new ResponseEntity<>(new ErrorDto(e.getMessage()),
-    // HttpStatus.FORBIDDEN);
-    // }
+    @ExceptionHandler(MaximumAccountLimitException.class)
+    public ResponseEntity<ErrorDto> handleMaximumAccountLimitException(MaximumAccountLimitException e) {
+        return new ResponseEntity<>(new ErrorDto(e.getMessage()), HttpStatus.CONFLICT);
+    }
+
 }
