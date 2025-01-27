@@ -22,7 +22,7 @@ const AccountProvider: React.FC<Props> = ({ children }) => {
   const { user } = useUserContext();
 
   const [activeAccountId, setActiveAccountId] = useState<number | null>(() =>
-    user.profile.accounts.length > 0 ? 1 : null
+    user.profile.accounts.length > 0 ? user.profile.accounts[0].id : null
   );
 
   const activeAccount = user.profile.accounts.find(

@@ -1,4 +1,4 @@
-package lv.solodeni.backend.service.helper;
+package lv.solodeni.backend.helper;
 
 import lv.solodeni.backend.model.Customer;
 import lv.solodeni.backend.model.dto.request.CustomerRegistrationDto;

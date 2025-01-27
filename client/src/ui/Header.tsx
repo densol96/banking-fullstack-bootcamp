@@ -20,8 +20,9 @@ const StyledHeader = styled.div`
 
 export const Header = () => {
   const { activeAccountId, setActiveAccountId } = useAccountContext();
-  const { user, logout } = useUserContext();
+  const { user, logout, hasAccounts } = useUserContext();
   const accounts = user.profile.accounts;
+
   return (
     <StyledHeader>
       <div>
@@ -31,15 +32,18 @@ export const Header = () => {
         </Heading>
       </div>
       <div>
-        <select
-          onChange={(e) => setActiveAccountId(+e.target.value)}
-          value={activeAccountId}
-        >
-          {accounts.map((account) => (
-            <option value={account.id}>{account.accountNumber}</option>
-          ))}
-        </select>
+        {hasAccounts && (
+          <select
+            onChange={(e) => setActiveAccountId(+e.target.value)}
+            value={activeAccountId}
+          >
+            {accounts.map((account) => (
+              <option value={account.id}>{account.accountNumber}</option>
+            ))}
+          </select>
+        )}
         <Button
+          color="primary"
           onClick={() => {
             toast.success("Logout succesfull");
             logout();

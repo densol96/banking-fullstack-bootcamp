@@ -1,11 +1,12 @@
 import { headersWithToken } from "../../helpers/headersWithToken";
 import { MiniForm } from "../../ui/MiniForm";
-import React from "react";
+import React, { useState } from "react";
 import { SlActionRedo } from "react-icons/sl";
 import axios from "axios";
 import { useUserContext } from "../../context/UserContext";
 import { useAccountContext } from "../../context/AccountContext";
 import toast from "react-hot-toast";
+import { catchBlockSpecial } from "../../helpers/catchBlockSpecial";
 
 type Props = {};
 
@@ -24,17 +25,7 @@ export const Withdrawal: React.FC<Props> = () => {
       refreshUser();
       toast.success(response.data.message);
     } catch (e) {
-      const errors =
-        e.response?.data?.errors &&
-        (Object.values(e.response?.data?.errors) as string[]);
-      toast.error(
-        <div style={{ textAlign: "center" }}>
-          {e.response?.data?.message ||
-            (errors && errors?.map((err) => <p>{err}</p>)) ||
-            "Something went wrong..."}
-        </div>
-      );
-      throw e;
+      catchBlockSpecial(e);
     }
   }
 

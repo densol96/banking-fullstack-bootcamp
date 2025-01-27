@@ -1,8 +1,8 @@
 import styled from "styled-components";
 
-const Button = styled.button`
+const Button = styled.button<{ color: string }>`
   display: inline-block;
-  background-color: var(--color-primary);
+  background-color: var(--color-${(props) => props.color});
   font-size: 1.6rem;
   font-family: inherit;
   font-weight: 500;

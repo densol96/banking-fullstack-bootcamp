@@ -14,7 +14,7 @@ export const ForgotForm = () => {
         <label>Email</label>
         <input type="text" />
       </FormLine>
-      <Button>Submit</Button>
+      <Button color="primary">Submit</Button>
       <AppLink to="/login">Login</AppLink>
       <AppLink to="/register">Register</AppLink>
     </Form>

@@ -51,6 +51,7 @@ export const MiniForm: React.FC<Props> = ({
   onSubmit,
 }) => {
   const [value, setValue] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   return (
     <Container color={color}>
@@ -59,9 +60,13 @@ export const MiniForm: React.FC<Props> = ({
         onSubmit={async (e) => {
           e.preventDefault();
           try {
+            setIsLoading(true);
             await onSubmit(value);
             setValue(0);
-          } catch (e) {}
+          } catch (e) {
+          } finally {
+            setIsLoading(false);
+          }
         }}
       >
         <input
@@ -69,7 +74,7 @@ export const MiniForm: React.FC<Props> = ({
           value={value}
           type="number"
         />
-        <button>{icon}</button>
+        <button disabled={isLoading}>{icon}</button>
       </ActionForm>
     </Container>
   );

@@ -53,7 +53,7 @@ export const LoginForm = () => {
           type="password"
         />
       </FormLine>
-      <Button>Submit</Button>
+      <Button color="primary">Submit</Button>
       <AppLink to="/forgot-password">Forgot password</AppLink>
       <AppLink to="/register">Create account</AppLink>
     </Form>
