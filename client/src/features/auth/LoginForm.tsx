@@ -7,6 +7,7 @@ import axios from "axios";
 import { useUserContext } from "../../context/UserContext";
 import toast from "react-hot-toast";
 import { Navigate } from "react-router";
+import { catchBlockSpecial } from "../../helpers/catchBlockSpecial";
 
 export const LoginForm = () => {
   const [email, setEmail] = useState("solo@deni.com");
@@ -22,12 +23,7 @@ export const LoginForm = () => {
       updateJwt(response.data.jwt);
       toast.success(response.data.message);
     } catch (e) {
-      console.log(e);
-      toast.error(
-        <p style={{ textAlign: "center" }}>
-          {e.response?.data?.message || "Something went wrong.."}
-        </p>
-      );
+      catchBlockSpecial(e, false);
     }
   }
 

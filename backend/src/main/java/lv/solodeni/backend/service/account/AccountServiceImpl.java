@@ -84,7 +84,7 @@ public class AccountServiceImpl implements IAccountService {
         if (amount > balance) {
             InsufficientFundsException e = new InsufficientFundsException(balance, amount);
             transactionRepo
-                    .save(new Transaction(null, account, amount, Status.FAILURE, TransactionType.DEPOSIT,
+                    .save(new Transaction(account, null, amount, Status.FAILURE, TransactionType.DEPOSIT,
                             e.getMessage()));
             throw e;
         }

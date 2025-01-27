@@ -1,4 +1,4 @@
-package lv.solodeni.backend.exception;
+package lv.solodeni.backend.exception.handler;
 
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.LinkedHashMap;
@@ -18,6 +18,14 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
+import lv.solodeni.backend.exception.EmailAlreadyExistsException;
+import lv.solodeni.backend.exception.EmailNotFoundException;
+import lv.solodeni.backend.exception.FeatureNotAvailableYetException;
+import lv.solodeni.backend.exception.InsufficientFundsException;
+import lv.solodeni.backend.exception.InvalidIdException;
+import lv.solodeni.backend.exception.InvalidUserRoleException;
+import lv.solodeni.backend.exception.PasswordMismatchException;
+import lv.solodeni.backend.exception.PasswordsNotMatchException;
 import lv.solodeni.backend.model.dto.response.ErrorDto;
 import lv.solodeni.backend.model.dto.response.ValidationErrorResponse;
 import lv.solodeni.backend.model.enums.Status;
@@ -105,5 +113,10 @@ public class GlobalExceptionHandler {
                 ? "Invalid password. Try to restore password if forgot."
                 : e.getMessage();
         return new ResponseEntity<>(new ErrorDto(msg), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(InvalidUserRoleException.class)
+    public ResponseEntity<ErrorDto> handleInvalidUserRoleException(InvalidUserRoleException e) {
+        return new ResponseEntity<>(new ErrorDto(e.getMessage()), HttpStatus.FORBIDDEN);
     }
 }

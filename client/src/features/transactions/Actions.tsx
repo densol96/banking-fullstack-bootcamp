@@ -2,6 +2,7 @@ import React from "react";
 import { Deposit } from "./Deposit";
 import { Withdrawal } from "./Withdrawal";
 import styled from "styled-components";
+import { Transfer } from "./Transfer";
 
 const Container = styled.div`
   display: flex;
@@ -16,6 +17,7 @@ export const Actions: React.FC<Props> = () => {
     <Container>
       <Deposit />
       <Withdrawal />
+      <Transfer />
     </Container>
   );
 };

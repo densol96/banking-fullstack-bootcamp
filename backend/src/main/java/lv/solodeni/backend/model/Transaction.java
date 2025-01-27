@@ -37,7 +37,6 @@ import lv.solodeni.backend.model.enums.TransactionType;
 @Data
 @NoArgsConstructor
 public class Transaction {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Setter(value = AccessLevel.NONE)
