@@ -11,7 +11,7 @@ import { catchBlockSpecial } from "../../helpers/catchBlockSpecial";
 type Props = {};
 
 export const Withdrawal: React.FC<Props> = () => {
-  const { refreshUser, jwt } = useUserContext();
+  const { refreshUser, jwt, logout } = useUserContext();
   const { activeAccountId } = useAccountContext();
 
   async function withdraw(amount: number) {
@@ -25,7 +25,7 @@ export const Withdrawal: React.FC<Props> = () => {
       refreshUser();
       toast.success(response.data.message);
     } catch (e) {
-      catchBlockSpecial(e);
+      catchBlockSpecial(e, logout);
     }
   }
 

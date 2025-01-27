@@ -23,7 +23,7 @@ export const LoginForm = () => {
       updateJwt(response.data.jwt);
       toast.success(response.data.message);
     } catch (e) {
-      catchBlockSpecial(e, false);
+      catchBlockSpecial(e, logout, false);
     }
   }
 

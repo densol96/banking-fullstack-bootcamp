@@ -28,8 +28,7 @@ const BalanceTotal = styled.div``;
 const MainSection = styled.section`
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10rem;
-  border: 1px solid red;
+  margin-top: 5rem;
 `;
 
 const Message = styled.div`

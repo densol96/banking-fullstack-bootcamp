@@ -36,7 +36,7 @@ export const RegisterForm = () => {
       toast.success(<p>{response.data.message}</p>);
       cleanInputs();
     } catch (e) {
-      catchBlockSpecial(e, false);
+      catchBlockSpecial(e, null, false);
     }
   }
 

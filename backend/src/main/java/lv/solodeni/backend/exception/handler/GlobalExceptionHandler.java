@@ -119,4 +119,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorDto> handleInvalidUserRoleException(InvalidUserRoleException e) {
         return new ResponseEntity<>(new ErrorDto(e.getMessage()), HttpStatus.FORBIDDEN);
     }
+
+    // @ExceptionHandler(InvalidUserRoleException.class)
+    // public ResponseEntity<ErrorDto>
+    // handleInvalidUserRoleException(InvalidUserRoleException e) {
+    // return new ResponseEntity<>(new ErrorDto(e.getMessage()),
+    // HttpStatus.FORBIDDEN);
+    // }
 }

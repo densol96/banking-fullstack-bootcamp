@@ -11,7 +11,7 @@ import { useState } from "react";
 type Props = {};
 
 export const Deposit: React.FC<Props> = () => {
-  const { refreshUser, jwt } = useUserContext();
+  const { refreshUser, jwt, logout } = useUserContext();
   const { activeAccountId } = useAccountContext();
 
   async function deposit(amount: number) {
@@ -25,7 +25,7 @@ export const Deposit: React.FC<Props> = () => {
       refreshUser();
       toast.success(response.data.message);
     } catch (e) {
-      catchBlockSpecial(e);
+      catchBlockSpecial(e, logout);
     }
   }
 

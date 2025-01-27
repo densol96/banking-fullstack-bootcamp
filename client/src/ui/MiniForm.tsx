@@ -29,7 +29,7 @@ const Container = styled.div<{ color: string }>`
   input {
     align-self: center;
     font-size: 3rem;
-    width: 50%;
+    width: 80%;
   }
 
   svg {

@@ -57,7 +57,7 @@ const InputHolder = styled.div`
 `;
 
 export const Transfer: React.FC<Props> = () => {
-  const { refreshUser, jwt } = useUserContext();
+  const { refreshUser, jwt, logout } = useUserContext();
   const { activeAccountId } = useAccountContext();
 
   const [amount, setAmount] = useState(0);
@@ -74,7 +74,7 @@ export const Transfer: React.FC<Props> = () => {
       refreshUser();
       toast.success(response.data.message);
     } catch (e) {
-      catchBlockSpecial(e, false);
+      catchBlockSpecial(e, logout, false);
     }
   }
 
