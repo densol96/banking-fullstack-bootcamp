@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { useUserContext } from "./UserContext";
 import { Account } from "../types/User";
 
@@ -28,9 +34,20 @@ const AccountProvider: React.FC<Props> = ({ children }) => {
     selectActiveAccountId
   );
 
+  const accountsRef = useRef(user.profile.accounts.length);
+
   useEffect(() => {
-    setActiveAccountId(selectActiveAccountId());
-  }, []);
+    const length = user.profile.accounts.length;
+    if (length < accountsRef.current) {
+      setActiveAccountId(
+        length !== 0 ? user.profile.accounts[length - 1].id : 0
+      );
+      accountsRef.current--;
+    } else if (length > accountsRef.current) {
+      setActiveAccountId(user.profile.accounts[length - 1].id);
+      accountsRef.current++;
+    }
+  }, [user.profile.accounts.length]);
 
   const activeAccount = user.profile.accounts.find(
     (acc) => acc.id === activeAccountId
