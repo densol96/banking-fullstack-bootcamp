@@ -20,7 +20,7 @@ import java.util.*;
 @SuperBuilder
 public class Customer extends User {
 
-    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL) // , fetch = FetchType.EAGER
     @Builder.Default
     private List<Account> accounts = new ArrayList<>();
 

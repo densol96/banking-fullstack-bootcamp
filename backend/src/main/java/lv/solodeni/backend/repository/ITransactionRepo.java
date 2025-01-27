@@ -12,4 +12,5 @@ import lv.solodeni.backend.model.Transaction;
 public interface ITransactionRepo extends JpaRepository<Transaction, Long> {
     @Query("SELECT t FROM Transaction t WHERE t.fromAccount = :account OR t.toAccount = :account")
     List<Transaction> findAllByFromAccountOrToAccount(@Param("account") Account account);
+
 }

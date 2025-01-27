@@ -1,8 +1,10 @@
 package lv.solodeni.backend.controller;
 
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,11 +13,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lv.solodeni.backend.model.dto.request.OperationAmountDto;
 import lv.solodeni.backend.model.dto.request.TransferDto;
 import lv.solodeni.backend.model.dto.response.BalanceDto;
+import lv.solodeni.backend.model.dto.response.BasicMessageDto;
 import lv.solodeni.backend.service.account.IAccountService;
 
 @RestController
@@ -48,10 +52,14 @@ public class AccountController {
         return new ResponseEntity<>(accountService.transfer(accountId, amountDto), HttpStatus.CREATED);
     }
 
-    @PostMapping("/{accountId}/create")
-    public ResponseEntity<BalanceDto> create(@PathVariable Long accountId,
-            @Valid @RequestBody TransferDto amountDto) {
-        return new ResponseEntity<>(accountService.transfer(accountId, amountDto), HttpStatus.CREATED);
+    @PostMapping("/create")
+    public ResponseEntity<BasicMessageDto> create() {
+        return new ResponseEntity<>(accountService.create(), HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("/{accountId}/delete")
+    public ResponseEntity<BasicMessageDto> delete(@PathVariable Long accountId) {
+        return new ResponseEntity<>(accountService.delete(accountId), HttpStatus.CREATED);
     }
 
 }

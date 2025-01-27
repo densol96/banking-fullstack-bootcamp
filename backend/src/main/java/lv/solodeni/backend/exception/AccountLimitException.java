@@ -1,7 +1,7 @@
 package lv.solodeni.backend.exception;
 
-public class MaximumAccountLimitException extends RuntimeException {
-    public MaximumAccountLimitException(String message) {
+public class AccountLimitException extends RuntimeException {
+    public AccountLimitException(String message) {
         super(message);
     }
 }

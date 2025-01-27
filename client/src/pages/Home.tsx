@@ -47,8 +47,6 @@ export const Home: React.FC<Props> = () => {
   const { user, hasAccounts } = useUserContext();
   const { activeAccountId, activeAccount } = useAccountContext();
 
-  console.log(activeAccount);
-
   if (hasAccounts)
     return (
       <>
@@ -58,7 +56,9 @@ export const Home: React.FC<Props> = () => {
             <p>As of {getFormattedDateTime()}</p>
           </BalanceDateText>
           <BalanceTotal>
-            <Heading as="h1">{formatBalance(activeAccount?.balance)}</Heading>
+            <Heading as="h1">
+              {formatBalance(activeAccount?.balance || 0)}
+            </Heading>
           </BalanceTotal>
         </BalanceSection>
         <MainSection>

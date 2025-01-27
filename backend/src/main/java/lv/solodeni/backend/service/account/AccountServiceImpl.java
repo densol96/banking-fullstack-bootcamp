@@ -3,10 +3,13 @@ package lv.solodeni.backend.service.account;
 import java.util.Arrays;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 
 import com.mysql.cj.exceptions.FeatureNotAvailableException;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 
 import lombok.RequiredArgsConstructor;
@@ -16,6 +19,7 @@ import lv.solodeni.backend.exception.InsufficientFundsException;
 import lv.solodeni.backend.exception.InvalidIdException;
 import lv.solodeni.backend.exception.InvalidToAcountNumber;
 import lv.solodeni.backend.exception.InvalidUserRoleException;
+import lv.solodeni.backend.exception.NotClearedBalanceException;
 import lv.solodeni.backend.exception.AccountLimitException;
 import lv.solodeni.backend.model.Account;
 import lv.solodeni.backend.model.Customer;
@@ -39,6 +43,8 @@ public class AccountServiceImpl implements IAccountService {
     private final IAccountRepo accountRepo;
     private final ITransactionRepo transactionRepo;
     private final IUserService userService;
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Value("${bank.maximum_deposit}")
     private Integer maximumDeposit;
@@ -48,7 +54,6 @@ public class AccountServiceImpl implements IAccountService {
 
     @Override
     public BalanceDto displayBalance(Long accountId) {
-
         if (accountId < 1)
             throw new InvalidIdException("There is no account with such id of " + accountId);
 
@@ -58,8 +63,8 @@ public class AccountServiceImpl implements IAccountService {
         return new BalanceDto(balance);
     }
 
-    @Transactional
     @Override
+    @Transactional
     public BalanceDto deposit(Long accountId, OperationAmountDto amountDto) {
         if (accountId < 1)
             throw new InvalidIdException("There is no account with such id of " + accountId);
@@ -80,8 +85,8 @@ public class AccountServiceImpl implements IAccountService {
         return new BalanceDto(account.getBalance());
     }
 
-    @Transactional
     @Override
+    @Transactional
     public BalanceDto withdraw(Long accountId, OperationAmountDto amountDto) {
 
         if (accountId < 1)
@@ -104,10 +109,9 @@ public class AccountServiceImpl implements IAccountService {
         return new BalanceDto(account.getBalance());
     }
 
-    @Transactional
     @Override
+    @Transactional
     public BalanceDto transfer(Long fromAccountId, TransferDto transferDto) {
-
         if (fromAccountId < 1)
             throw new InvalidIdException("There is no fromAccountId with such id of " + fromAccountId);
 
@@ -167,40 +171,37 @@ public class AccountServiceImpl implements IAccountService {
     }
 
     @Override
+    @Transactional
     public BasicMessageDto create() {
         User loggedInUser = userService.getLoggedInUser();
+
         if (!(loggedInUser instanceof Customer))
             throw new InvalidUserRoleException("Only customers can create new account");
-        Customer customer = (Customer) loggedInUser;
-        if (customer.getAccounts().size() >= 3)
+
+        if (accountRepo.countAllByCustomerId(loggedInUser.getId()) >= 3)
             throw new AccountLimitException("Customer cannot have more than 3 accounts.");
-        Account newAccount = new Account(0.0, customer);
+
+        Account newAccount = new Account(0.0, (Customer) loggedInUser);
         accountRepo.save(newAccount);
         return new BasicMessageDto("You have successfully created a new account.");
     }
 
-    @Override
+    @Transactional
     public BasicMessageDto delete(Long accountId) {
         User loggedInUser = userService.getLoggedInUser();
-        if (!(loggedInUser instanceof Customer))
+        if (!(loggedInUser instanceof Customer)) {
             throw new InvalidUserRoleException("Only customers can delete a banking account.");
-        Customer customer = (Customer) loggedInUser;
-        if (customer.getAccounts() == null || customer.getAccounts().size() == 0)
-            throw new AccountLimitException("You do not have any banking accounts.");
-
-        boolean belongsToLoggedInUser = false;
-        for (Account acc : customer.getAccounts()) {
-            if (acc.getId() == accountId) {
-                belongsToLoggedInUser = true;
-                break;
-            }
         }
-        if (!belongsToLoggedInUser)
-            throw new InvalidUserRoleException("Customers can only delete their own accounts");
 
-        accountRepo.deleteById(accountId);
+        if (!accountRepo.existsByIdAndCustomerId(accountId, loggedInUser.getId())) {
+            throw new InvalidUserRoleException("Customers cannot delete other's banking account.");
+        }
+
+        Account accountForDelete = accountRepo.findById(accountId).get();
+        if (accountForDelete.getBalance() != 0)
+            throw new NotClearedBalanceException();
+        accountRepo.delete(accountForDelete);
         return new BasicMessageDto("You have successfully deleted your account.");
-
     }
 
 }

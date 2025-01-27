@@ -49,7 +49,7 @@ const Td = styled.td`
 `;
 
 export const TransactionHistory: React.FC<Props> = () => {
-  const { jwt } = useUserContext();
+  const { jwt, trigger } = useUserContext();
   const { activeAccountId, activeAccount } = useAccountContext();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
@@ -66,7 +66,7 @@ export const TransactionHistory: React.FC<Props> = () => {
 
   useEffect(() => {
     fetchTransactions();
-  });
+  }, [trigger, activeAccountId]);
 
   return (
     <Transactions>

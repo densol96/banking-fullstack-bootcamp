@@ -28,6 +28,7 @@ import lv.solodeni.backend.model.dto.response.SignInResponseDto;
 import lv.solodeni.backend.model.dto.response.UserDto;
 import lv.solodeni.backend.model.dto.response.UserProfile;
 import lv.solodeni.backend.model.enums.UserRole;
+import lv.solodeni.backend.repository.IAccountRepo;
 import lv.solodeni.backend.repository.IUserRepo;
 import lv.solodeni.backend.service.JWTService;
 
@@ -36,13 +37,12 @@ import lv.solodeni.backend.service.JWTService;
 public class UserServiceImpl implements IUserService {
 
     private final IUserRepo userRepo;
+    private final IAccountRepo accountRepo;
     private final AuthenticationManager authenticationManager;
     private final JWTService jwtService;
-    private final SessionFactory sessionFactory;
 
     @Override
     public SignInResponseDto signIn(SignInCredentialsDto userData) {
-        User user = userRepo.findByEmail(userData.email()).orElseThrow(() -> new EmailNotFoundException());
         try {
             Authentication auth = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -63,7 +63,7 @@ public class UserServiceImpl implements IUserService {
         boolean isCustomer = loggedInUser.getRole() == UserRole.CUSTOMER;
         if (isCustomer) {
             Customer customer = (Customer) loggedInUser;
-            List<AccountDto> accountsAsDto = customer.getAccounts().stream()
+            List<AccountDto> accountsAsDto = accountRepo.findAllByCustomerId(customer.getId()).stream()
                     .map(account -> new AccountDto(account.getId(), account.getBalance(),
                             account.getAccountNumber()))
                     .toList();

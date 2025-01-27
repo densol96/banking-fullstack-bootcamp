@@ -12,6 +12,7 @@ type UserContextType = {
   refreshUser: () => void;
   jwt: string;
   hasAccounts: boolean;
+  trigger: boolean;
 };
 
 const UserContext = createContext<UserContextType>({
@@ -21,6 +22,7 @@ const UserContext = createContext<UserContextType>({
   refreshUser: () => {},
   jwt: "",
   hasAccounts: false,
+  trigger: true,
 });
 
 type Props = {
@@ -65,7 +67,15 @@ const UserProvider: React.FC<Props> = ({ children }) => {
 
   return (
     <UserContext.Provider
-      value={{ user, updateJwt, logout, refreshUser, jwt, hasAccounts }}
+      value={{
+        user,
+        updateJwt,
+        logout,
+        refreshUser,
+        jwt,
+        hasAccounts,
+        trigger,
+      }}
     >
       {!isReady ? <Spinner /> : children}
     </UserContext.Provider>

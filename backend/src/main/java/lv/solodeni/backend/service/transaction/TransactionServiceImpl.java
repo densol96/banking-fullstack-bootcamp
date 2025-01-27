@@ -4,14 +4,15 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lv.solodeni.backend.exception.InvalidUserRoleException;
 import lv.solodeni.backend.model.Account;
 import lv.solodeni.backend.model.Customer;
-import lv.solodeni.backend.model.Employee;
 
 import lv.solodeni.backend.model.User;
 import lv.solodeni.backend.model.dto.response.TransactionDto;
+import lv.solodeni.backend.repository.IAccountRepo;
 import lv.solodeni.backend.repository.ITransactionRepo;
 import lv.solodeni.backend.service.user.IUserService;
 
@@ -21,31 +22,22 @@ public class TransactionServiceImpl implements ITransactionService {
 
     private final IUserService userService;
     private final ITransactionRepo transactionRepo;
+    private final IAccountRepo accountRepo;
 
     @Override
+    @Transactional
     public List<TransactionDto> getLoggedInUserTransactions(Long accountId) {
         User loggedInUser = userService.getLoggedInUser();
 
-        if (loggedInUser instanceof Employee)
+        if (!(loggedInUser instanceof Customer))
             throw new InvalidUserRoleException("Only customers have banking accounts");
 
-        Customer customer = (Customer) loggedInUser;
-
-        boolean belongsToLoggedInUser = false;
-        Account fromAccount = null;
-
-        for (Account acc : customer.getAccounts()) {
-            if (acc.getId() == accountId) {
-                belongsToLoggedInUser = true;
-                fromAccount = acc;
-                break;
-            }
+        if (!accountRepo.existsByIdAndCustomerId(accountId, loggedInUser.getId())) {
+            throw new InvalidUserRoleException("Customers cannot delete other's banking account.");
         }
+        Account requestedAccount = accountRepo.findById(accountId).get();
 
-        if (!belongsToLoggedInUser)
-            throw new InvalidUserRoleException("Customers can only require their own transactions history");
-
-        return transactionRepo.findAllByFromAccountOrToAccount(fromAccount).stream()
+        return transactionRepo.findAllByFromAccountOrToAccount(requestedAccount).stream()
                 .map(transaction -> new TransactionDto(
                         transaction.getId(),
                         transaction.getFromAccount() != null ? transaction.getFromAccount().getAccountNumber() : null,

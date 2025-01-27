@@ -21,9 +21,16 @@ type Props = {
 const AccountProvider: React.FC<Props> = ({ children }) => {
   const { user } = useUserContext();
 
-  const [activeAccountId, setActiveAccountId] = useState<number | null>(() =>
-    user.profile.accounts.length > 0 ? user.profile.accounts[0].id : null
+  const selectActiveAccountId = () =>
+    user.profile.accounts.length > 0 ? user.profile.accounts[0].id : null;
+
+  const [activeAccountId, setActiveAccountId] = useState<number | null>(
+    selectActiveAccountId
   );
+
+  useEffect(() => {
+    setActiveAccountId(selectActiveAccountId());
+  }, []);
 
   const activeAccount = user.profile.accounts.find(
     (acc) => acc.id === activeAccountId
