@@ -31,39 +31,10 @@ const AccountGroup = styled.div`
 `;
 
 export const Header = () => {
-  const { activeAccountId, setActiveAccountId } = useAccountContext();
-  const { user, logout, hasAccounts, jwt, refreshUser } = useUserContext();
+  const { activeAccountId, setActiveAccountId, createAccount, deleteAccount } =
+    useAccountContext();
+  const { user, logout, hasAccounts } = useUserContext();
   const accounts = user.profile.accounts;
-
-  async function deleteAccount() {
-    const API_ENDPOINT = `${process.env.REACT_APP_API_URL}/accounts/${activeAccountId}/delete`;
-    try {
-      const response = await axios.delete(API_ENDPOINT, headersWithToken(jwt));
-      refreshUser();
-      toast.success(response.data.message);
-    } catch (e) {
-      catchBlockSpecial(e, logout, false);
-    }
-  }
-
-  async function createAccount() {
-    const API_ENDPOINT = `${process.env.REACT_APP_API_URL}/accounts/create`;
-    try {
-      const response = await axios.post(
-        API_ENDPOINT,
-        {},
-        headersWithToken(jwt)
-      );
-      refreshUser();
-      toast.success(response.data.message);
-    } catch (e) {
-      catchBlockSpecial(e, logout, false);
-    }
-  }
-
-  useEffect(() => {
-    console.log(user);
-  }, [user]);
 
   return (
     <StyledHeader>

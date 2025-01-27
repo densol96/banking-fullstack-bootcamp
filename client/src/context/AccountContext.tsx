@@ -7,17 +7,25 @@ import React, {
 } from "react";
 import { useUserContext } from "./UserContext";
 import { Account } from "../types/User";
+import { headersWithToken } from "../helpers/headersWithToken";
+import toast from "react-hot-toast";
+import { catchBlockSpecial } from "../helpers/catchBlockSpecial";
+import axios from "axios";
 
 type AccountContextType = {
   activeAccountId: number | null;
   setActiveAccountId: (value: number) => void;
   activeAccount: Account | null;
+  createAccount: () => void;
+  deleteAccount: () => void;
 };
 
 const AccountContext = createContext<AccountContextType>({
   activeAccountId: null,
   setActiveAccountId: () => {},
   activeAccount: null,
+  createAccount: () => {},
+  deleteAccount: () => {},
 });
 
 type Props = {
@@ -25,7 +33,7 @@ type Props = {
 };
 
 const AccountProvider: React.FC<Props> = ({ children }) => {
-  const { user } = useUserContext();
+  const { user, refreshUser, jwt, logout } = useUserContext();
 
   const selectActiveAccountId = () =>
     user.profile.accounts.length > 0 ? user.profile.accounts[0].id : null;
@@ -53,9 +61,41 @@ const AccountProvider: React.FC<Props> = ({ children }) => {
     (acc) => acc.id === activeAccountId
   );
 
+  async function deleteAccount() {
+    const API_ENDPOINT = `${process.env.REACT_APP_API_URL}/accounts/${activeAccountId}/delete`;
+    try {
+      const response = await axios.delete(API_ENDPOINT, headersWithToken(jwt));
+      refreshUser();
+      toast.success(response.data.message);
+    } catch (e) {
+      catchBlockSpecial(e, logout, false);
+    }
+  }
+
+  async function createAccount() {
+    const API_ENDPOINT = `${process.env.REACT_APP_API_URL}/accounts/create`;
+    try {
+      const response = await axios.post(
+        API_ENDPOINT,
+        {},
+        headersWithToken(jwt)
+      );
+      refreshUser();
+      toast.success(response.data.message);
+    } catch (e) {
+      catchBlockSpecial(e, logout, false);
+    }
+  }
+
   return (
     <AccountContext.Provider
-      value={{ activeAccountId, setActiveAccountId, activeAccount }}
+      value={{
+        activeAccountId,
+        setActiveAccountId,
+        activeAccount,
+        deleteAccount,
+        createAccount,
+      }}
     >
       {children}
     </AccountContext.Provider>

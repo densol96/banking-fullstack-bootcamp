@@ -4,10 +4,10 @@ import styled from "styled-components";
 import { useAccountContext } from "../context/AccountContext";
 import Heading from "../ui/Heading";
 import { getFormattedDateTime } from "../helpers/formattedDateTime";
-import { formatBalance } from "../helpers/formatBalance";
 import { TransactionHistory } from "../features/transactions/TransactionHistory";
 import { Actions } from "../features/transactions/Actions";
 import { Button } from "../ui/Button";
+import { formatBalance } from "../helpers/formatBalance";
 
 type Props = {
   className?: string;
@@ -45,7 +45,7 @@ const Message = styled.div`
 
 export const Home: React.FC<Props> = () => {
   const { user, hasAccounts } = useUserContext();
-  const { activeAccountId, activeAccount } = useAccountContext();
+  const { activeAccountId, activeAccount, createAccount } = useAccountContext();
 
   if (hasAccounts)
     return (
@@ -71,7 +71,7 @@ export const Home: React.FC<Props> = () => {
     return (
       <Message>
         <Heading>No active banking accounts</Heading>
-        <Button onClick={() => alert("In development...")} color="secondary">
+        <Button onClick={createAccount} color="secondary">
           Create
         </Button>
       </Message>
