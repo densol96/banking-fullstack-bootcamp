@@ -1,5 +1,7 @@
 package lv.solodeni.backend.controller;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +22,7 @@ import lv.solodeni.backend.model.dto.request.OperationAmountDto;
 import lv.solodeni.backend.model.dto.request.TransferDto;
 import lv.solodeni.backend.model.dto.response.BalanceDto;
 import lv.solodeni.backend.model.dto.response.BasicMessageDto;
+import lv.solodeni.backend.model.dto.response.ExternalAccountDto;
 import lv.solodeni.backend.model.dto.response.TransactionSucessDto;
 import lv.solodeni.backend.service.account.IAccountService;
 
@@ -67,6 +70,11 @@ public class AccountController {
     public ResponseEntity<TransactionSucessDto> acceptExternalTransfer(
             @Valid @RequestBody ExternalTransferDto transferDto) {
         return new ResponseEntity<>(accountService.acceptExternalTransfer(transferDto), HttpStatus.OK);
+    }
+
+    @GetMapping("/public")
+    public ResponseEntity<List<ExternalAccountDto>> displayBankAccountsPublicly() {
+        return new ResponseEntity<>(accountService.displayPublicBankAccounts(), HttpStatus.OK);
     }
 
 }

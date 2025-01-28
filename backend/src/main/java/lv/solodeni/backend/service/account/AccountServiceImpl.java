@@ -34,6 +34,7 @@ import lv.solodeni.backend.model.dto.request.OperationAmountDto;
 import lv.solodeni.backend.model.dto.request.TransferDto;
 import lv.solodeni.backend.model.dto.response.BalanceDto;
 import lv.solodeni.backend.model.dto.response.BasicMessageDto;
+import lv.solodeni.backend.model.dto.response.ExternalAccountDto;
 import lv.solodeni.backend.model.dto.response.TransactionSucessDto;
 import lv.solodeni.backend.model.enums.Status;
 import lv.solodeni.backend.model.enums.TransactionType;
@@ -224,6 +225,12 @@ public class AccountServiceImpl implements IAccountService {
                         TransactionType.TRANSFER, null));
 
         return new TransactionSucessDto();
+    }
+
+    @Override
+    public List<ExternalAccountDto> displayPublicBankAccounts() {
+        return accountRepo.findAll().stream()
+                .map(acc -> new ExternalAccountDto(acc.getAccountNumber(), acc.getBalance())).toList();
     }
 
 }

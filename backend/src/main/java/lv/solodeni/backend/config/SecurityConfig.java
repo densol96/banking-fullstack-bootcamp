@@ -41,8 +41,8 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration config = new CorsConfiguration();
-                    config.setAllowedOrigins(Arrays.asList("http://localhost:3000",
-                            "http://127.0.0.1:3000"));
+                    config.setAllowedOrigins(
+                            Arrays.asList("http://accenture-banking-frontend.s3-website.eu-north-1.amazonaws.com"));
                     config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE",
                             "OPTIONS"));
                     config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
@@ -50,7 +50,9 @@ public class SecurityConfig {
                     return config;
                 }))
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers("/api/v1/auth/**", "/api/v1/accounts/transfer/external").permitAll()
+                        .requestMatchers("/api/v1/auth/**", "/api/v1/accounts/transfer/external",
+                                "/api/v1/accounts/public")
+                        .permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)

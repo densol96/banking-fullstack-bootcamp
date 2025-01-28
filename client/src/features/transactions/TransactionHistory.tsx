@@ -43,9 +43,15 @@ const TransferSpecifier = styled.td`
   gap: 3rem;
 `;
 
-const Td = styled.td`
+const TransactionGroup = styled.div`
   display: flex;
+  justify-content: center;
   align-items: center;
+  gap: 1rem;
+
+  p {
+    /* font-size: 1rem; */
+  }
 `;
 
 export const TransactionHistory: React.FC<Props> = () => {
@@ -86,13 +92,17 @@ export const TransactionHistory: React.FC<Props> = () => {
               <Type color={color}>{transaction.type}</Type>
               {transaction.type === "TRANSFER" &&
                 (transaction.toAccountNumber === activeAccount.accountNumber ? (
-                  <FaPlusCircle />
+                  <TransactionGroup>
+                    <FaPlusCircle /> <p>{transaction.fromAccountNumber}</p>
+                  </TransactionGroup>
                 ) : (
-                  <FaMinusCircle />
+                  <TransactionGroup>
+                    <FaMinusCircle /> <p>{transaction.toAccountNumber}</p>
+                  </TransactionGroup>
                 ))}
             </TransferSpecifier>
-            <Td>{getConciseDateTime(transaction.transactionDateTime)}</Td>
-            <Td>{formatBalance(transaction.amount)}</Td>
+            <p>{getConciseDateTime(transaction.transactionDateTime)}</p>
+            <p>{formatBalance(transaction.amount)}</p>
           </TransactionLine>
         );
       })}
