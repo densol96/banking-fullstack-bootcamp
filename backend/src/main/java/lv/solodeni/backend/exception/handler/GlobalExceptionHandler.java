@@ -20,6 +20,7 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import lv.solodeni.backend.exception.EmailAlreadyExistsException;
 import lv.solodeni.backend.exception.EmailNotFoundException;
+import lv.solodeni.backend.exception.FailedTransactionException;
 import lv.solodeni.backend.exception.FeatureNotAvailableYetException;
 import lv.solodeni.backend.exception.InsufficientFundsException;
 import lv.solodeni.backend.exception.InvalidIdException;
@@ -130,5 +131,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NotClearedBalanceException.class)
     public ResponseEntity<ErrorDto> handleMaximumAccountLimitException(NotClearedBalanceException e) {
         return new ResponseEntity<>(new ErrorDto(e.getMessage()), HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(FailedTransactionException.class)
+    public ResponseEntity<ErrorDto> handleFailedTransactionException(FailedTransactionException e) {
+        return new ResponseEntity<>(new ErrorDto(e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

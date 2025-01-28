@@ -40,7 +40,9 @@ public class TransactionServiceImpl implements ITransactionService {
         return transactionRepo.findAllByFromAccountOrToAccount(requestedAccount).stream()
                 .map(transaction -> new TransactionDto(
                         transaction.getId(),
-                        transaction.getFromAccount() != null ? transaction.getFromAccount().getAccountNumber() : null,
+                        transaction.getFromAccount() != null ? transaction.getFromAccount().getAccountNumber()
+                                : transaction.getExternalFromAccountNumber(), // could also be null if withdrawal, but
+                                                                              // this ternary will work
                         transaction.getToAccount() != null ? transaction.getToAccount().getAccountNumber() : null,
                         transaction.getAmount(),
                         transaction.getTransactionDateTime(),

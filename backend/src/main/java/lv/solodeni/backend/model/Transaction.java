@@ -11,9 +11,12 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -45,6 +48,8 @@ public class Transaction {
     @JoinColumn(name = "from_account_id")
     private Account fromAccount;
 
+    private String externalFromAccountNumber;
+
     @ManyToOne
     @JoinColumn(name = "to_account_id")
     private Account toAccount;
@@ -65,15 +70,26 @@ public class Transaction {
     @Column(nullable = false)
     private TransactionType type;
 
-    public Transaction(Account fromAccount, Account toAccount, Double amount, Status status, TransactionType type,
-            String errorMessage) {
+    public Transaction(Account fromAccount, String externalFromAccountNumber, Account toAccount, Double amount,
+            Status status, TransactionType type, String errorMessage) {
         this.fromAccount = fromAccount;
+        this.externalFromAccountNumber = externalFromAccountNumber;
         this.toAccount = toAccount;
         this.amount = amount;
         this.transactionDateTime = LocalDateTime.now();
         this.status = status;
         this.type = type;
         this.errorMessage = errorMessage;
+    }
+
+    @PrePersist
+    @PreUpdate
+    public void validateAccounts() {
+        if (type == TransactionType.TRANSFER && fromAccount == null && externalFromAccountNumber == null
+                || fromAccount != null && externalFromAccountNumber != null) {
+            throw new IllegalStateException("Transaction should / can only have 1 origin source.");
+        }
+
     }
 
 }

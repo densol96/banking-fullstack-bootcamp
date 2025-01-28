@@ -13,13 +13,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lv.solodeni.backend.model.dto.request.ExternalTransferDto;
 import lv.solodeni.backend.model.dto.request.OperationAmountDto;
 import lv.solodeni.backend.model.dto.request.TransferDto;
 import lv.solodeni.backend.model.dto.response.BalanceDto;
 import lv.solodeni.backend.model.dto.response.BasicMessageDto;
+import lv.solodeni.backend.model.dto.response.TransactionSucessDto;
 import lv.solodeni.backend.service.account.IAccountService;
 
 @RestController
@@ -60,6 +61,12 @@ public class AccountController {
     @DeleteMapping("/{accountId}/delete")
     public ResponseEntity<BasicMessageDto> delete(@PathVariable Long accountId) {
         return new ResponseEntity<>(accountService.delete(accountId), HttpStatus.CREATED);
+    }
+
+    @PostMapping("/transfer/external")
+    public ResponseEntity<TransactionSucessDto> acceptExternalTransfer(
+            @Valid @RequestBody ExternalTransferDto transferDto) {
+        return new ResponseEntity<>(accountService.acceptExternalTransfer(transferDto), HttpStatus.OK);
     }
 
 }

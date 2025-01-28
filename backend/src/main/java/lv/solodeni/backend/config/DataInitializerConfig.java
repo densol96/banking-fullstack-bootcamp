@@ -53,11 +53,11 @@ public class DataInitializerConfig {
                         customerRepo.save(customer1);
                         customerRepo.save(customer2);
 
-                        Transaction tr1 = new Transaction(cutomer1Account1, cutomer2Account, 50.0,
+                        Transaction tr1 = new Transaction(cutomer1Account1, null, cutomer2Account, 50.0,
                                         Status.SUCCESS, TransactionType.TRANSFER, null);
-                        Transaction tr2 = new Transaction(cutomer1Account1, cutomer2Account, 150.0,
+                        Transaction tr2 = new Transaction(cutomer1Account1, null, cutomer2Account, 150.0,
                                         Status.SUCCESS, TransactionType.TRANSFER, null);
-                        Transaction tr3 = new Transaction(cutomer2Account, cutomer1Account1, 50.0,
+                        Transaction tr3 = new Transaction(cutomer2Account, null, cutomer1Account1, 50.0,
                                         Status.SUCCESS, TransactionType.TRANSFER, null);
 
                         transactionRepo.saveAll(Arrays.asList(tr1, tr2, tr3));
