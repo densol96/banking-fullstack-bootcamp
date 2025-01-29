@@ -49,6 +49,7 @@ public class Transaction {
     private Account fromAccount;
 
     private String externalFromAccountNumber;
+    private String externalToAccountNumber;
 
     @ManyToOne
     @JoinColumn(name = "to_account_id")
@@ -62,34 +63,35 @@ public class Transaction {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Status status;
-
-    private String errorMessage;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private TransactionType type;
 
-    public Transaction(Account fromAccount, String externalFromAccountNumber, Account toAccount, Double amount,
-            Status status, TransactionType type, String errorMessage) {
+    @Builder
+    public Transaction(Account fromAccount, String externalFromAccountNumber, Account toAccount,
+            String externalToAccountNumber, Double amount,
+            TransactionType type) {
         this.fromAccount = fromAccount;
         this.externalFromAccountNumber = externalFromAccountNumber;
         this.toAccount = toAccount;
+        this.externalToAccountNumber = externalToAccountNumber;
         this.amount = amount;
         this.transactionDateTime = LocalDateTime.now();
-        this.status = status;
         this.type = type;
-        this.errorMessage = errorMessage;
+
     }
 
     @PrePersist
     @PreUpdate
     public void validateAccounts() {
-        if (type == TransactionType.TRANSFER && fromAccount == null && externalFromAccountNumber == null
-                || fromAccount != null && externalFromAccountNumber != null) {
-            throw new IllegalStateException("Transaction should / can only have 1 origin source.");
+        if (type == TransactionType.TRANSFER && isInvalidTransfer()) {
+            throw new IllegalStateException("Transaction should / can only have 1 origin source and target.");
         }
+    }
 
+    private boolean isInvalidTransfer() {
+        return (fromAccount == null && externalFromAccountNumber == null) ||
+                (toAccount == null && externalToAccountNumber == null) ||
+                (fromAccount != null && externalFromAccountNumber != null) ||
+                (toAccount != null && externalToAccountNumber != null);
     }
 
 }

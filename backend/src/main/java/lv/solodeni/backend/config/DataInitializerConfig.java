@@ -9,18 +9,19 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import lv.solodeni.backend.model.Account;
+import lv.solodeni.backend.model.BankWhitelist;
 import lv.solodeni.backend.model.Customer;
 import lv.solodeni.backend.model.Transaction;
-import lv.solodeni.backend.model.enums.Status;
 import lv.solodeni.backend.model.enums.TransactionType;
 import lv.solodeni.backend.model.enums.UserRole;
+import lv.solodeni.backend.repository.IBankWhitelistRepo;
 import lv.solodeni.backend.repository.ICustomerRepo;
 import lv.solodeni.backend.repository.ITransactionRepo;
 
 @Configuration
 public class DataInitializerConfig {
         @Bean
-        @Profile("set_up")
+        @Profile("dev_2")
         public CommandLineRunner seedInitialDataInDatabase(ICustomerRepo customerRepo, ITransactionRepo transactionRepo,
                         PasswordEncoder encoder) {
                 return args -> {
@@ -53,15 +54,44 @@ public class DataInitializerConfig {
                         customerRepo.save(customer1);
                         customerRepo.save(customer2);
 
-                        Transaction tr1 = new Transaction(cutomer1Account1, null, cutomer2Account, 50.0,
-                                        Status.SUCCESS, TransactionType.TRANSFER, null);
-                        Transaction tr2 = new Transaction(cutomer1Account1, null, cutomer2Account, 150.0,
-                                        Status.SUCCESS, TransactionType.TRANSFER, null);
-                        Transaction tr3 = new Transaction(cutomer2Account, null, cutomer1Account1, 50.0,
-                                        Status.SUCCESS, TransactionType.TRANSFER, null);
+                        Transaction tr1 = Transaction.builder()
+                                        .fromAccount(cutomer1Account1)
+                                        .toAccount(cutomer2Account)
+                                        .amount(50.0)
+                                        .type(TransactionType.TRANSFER)
+                                        .build();
+
+                        Transaction tr2 = Transaction.builder()
+                                        .fromAccount(cutomer1Account1)
+                                        .toAccount(cutomer2Account)
+                                        .amount(150.0)
+                                        .type(TransactionType.TRANSFER)
+                                        .build();
+
+                        Transaction tr3 = Transaction.builder()
+                                        .fromAccount(cutomer2Account)
+                                        .toAccount(cutomer1Account1)
+                                        .amount(50.0)
+                                        .type(TransactionType.TRANSFER)
+                                        .build();
 
                         transactionRepo.saveAll(Arrays.asList(tr1, tr2, tr3));
-                        System.out.println("======> " + customer1.getId().toString());
+                        System.out.println("=== DATABASE DATA SEEDED ===");
                 };
+        }
+
+        @Bean
+        @Profile("dev")
+        public CommandLineRunner seedInitialDataInDatabase2(IBankWhitelistRepo repo) {
+                return args -> {
+                        BankWhitelist me = new BankWhitelist("SOLDEN", "13.60.62.171");
+                        BankWhitelist Nazar = new BankWhitelist("NAZBON", null);
+                        BankWhitelist YUSNIN = new BankWhitelist("YUSNIN", null);
+                        BankWhitelist KULVLA = new BankWhitelist("KULVLA", null);
+                        BankWhitelist GELDOV = new BankWhitelist("GELDOV", null);
+                        BankWhitelist TSTBNK = new BankWhitelist("TSTBNK", null);
+                        repo.saveAll(Arrays.asList(me, Nazar, YUSNIN, KULVLA, GELDOV));
+                };
+
         }
 }

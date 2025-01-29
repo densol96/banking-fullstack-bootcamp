@@ -24,6 +24,7 @@ import lv.solodeni.backend.exception.FailedTransactionException;
 import lv.solodeni.backend.exception.FeatureNotAvailableYetException;
 import lv.solodeni.backend.exception.InsufficientFundsException;
 import lv.solodeni.backend.exception.InvalidIdException;
+import lv.solodeni.backend.exception.InvalidToAcountNumber;
 import lv.solodeni.backend.exception.InvalidUserRoleException;
 import lv.solodeni.backend.exception.NotClearedBalanceException;
 import lv.solodeni.backend.exception.AccountLimitException;
@@ -135,6 +136,17 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(FailedTransactionException.class)
     public ResponseEntity<ErrorDto> handleFailedTransactionException(FailedTransactionException e) {
+        return new ResponseEntity<>(new ErrorDto(e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(InvalidToAcountNumber.class)
+    public ResponseEntity<ErrorDto> handleFailedTransactionException(InvalidToAcountNumber e) {
+        return new ResponseEntity<>(new ErrorDto(e.getMessage()), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorDto> handleUnexpectedException(Exception e) {
+        System.out.println("UNEXPECTED EXCEPTION: " + e.getMessage());
         return new ResponseEntity<>(new ErrorDto(e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

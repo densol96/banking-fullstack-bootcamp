@@ -1,14 +1,15 @@
 package lv.solodeni.backend.service.account;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import org.springframework.http.*;
+import org.springframework.web.client.RestTemplate;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
-
-import com.mysql.cj.exceptions.FeatureNotAvailableException;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -25,6 +26,7 @@ import lv.solodeni.backend.exception.InvalidUserRoleException;
 import lv.solodeni.backend.exception.NotClearedBalanceException;
 import lv.solodeni.backend.exception.AccountLimitException;
 import lv.solodeni.backend.model.Account;
+import lv.solodeni.backend.model.BankWhitelist;
 import lv.solodeni.backend.model.Customer;
 
 import lv.solodeni.backend.model.Transaction;
@@ -36,9 +38,10 @@ import lv.solodeni.backend.model.dto.response.BalanceDto;
 import lv.solodeni.backend.model.dto.response.BasicMessageDto;
 import lv.solodeni.backend.model.dto.response.ExternalAccountDto;
 import lv.solodeni.backend.model.dto.response.TransactionSucessDto;
-import lv.solodeni.backend.model.enums.Status;
+
 import lv.solodeni.backend.model.enums.TransactionType;
 import lv.solodeni.backend.repository.IAccountRepo;
+import lv.solodeni.backend.repository.IBankWhitelistRepo;
 import lv.solodeni.backend.repository.ITransactionRepo;
 import lv.solodeni.backend.service.user.IUserService;
 
@@ -51,6 +54,8 @@ public class AccountServiceImpl implements IAccountService {
     private final IAccountRepo accountRepo;
     private final ITransactionRepo transactionRepo;
     private final IUserService userService;
+    private final IBankWhitelistRepo whitelistRepo;
+
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -66,11 +71,11 @@ public class AccountServiceImpl implements IAccountService {
 
         User loggedInUser = userService.getLoggedInUser();
         if (!(loggedInUser instanceof Customer)) {
-            throw new InvalidUserRoleException("Only customers can view their own balance.");
+            throw new InvalidUserRoleException("You are not a customer type of user to eprform this action.");
         }
 
         if (!accountRepo.existsByIdAndCustomerId(accountId, loggedInUser.getId())) {
-            throw new InvalidUserRoleException("Customers cannot view other's banking account balances.");
+            throw new InvalidUserRoleException("Customers can only have manage the bank accounts that belong to them.");
         }
 
         return accountRepo.findById(accountId).get();
@@ -88,18 +93,17 @@ public class AccountServiceImpl implements IAccountService {
     public BalanceDto deposit(Long accountId, OperationAmountDto amountDto) {
         Account account = doSecurityChecksAndExtractAccount(accountId);
         Double amount = amountDto.amount();
-        if (amount > maximumDeposit) {
-            DepositLimitExceededException e = new DepositLimitExceededException(amount, maximumDeposit);
-
-            transactionRepo
-                    .save(new Transaction(null, null, account, amount, Status.FAILURE, TransactionType.DEPOSIT,
-                            e.getMessage()));
-            throw e;
-        }
+        if (amount > maximumDeposit)
+            throw new DepositLimitExceededException(amount, maximumDeposit);
         account.deposit(amount);
         accountRepo.save(account);
-        transactionRepo
-                .save(new Transaction(null, null, account, amount, Status.SUCCESS, TransactionType.DEPOSIT, null));
+        transactionRepo.save(
+                Transaction.builder()
+                        .toAccount(account)
+                        .amount(amount)
+                        .type(TransactionType.DEPOSIT)
+                        .build());
+
         return new BalanceDto(account.getBalance());
     }
 
@@ -109,17 +113,16 @@ public class AccountServiceImpl implements IAccountService {
         Account account = doSecurityChecksAndExtractAccount(accountId);
         Double amount = amountDto.amount();
         Double balance = account.getBalance();
-        if (amount > balance) {
-            InsufficientFundsException e = new InsufficientFundsException(balance, amount);
-            transactionRepo
-                    .save(new Transaction(account, null, null, amount, Status.FAILURE, TransactionType.DEPOSIT,
-                            e.getMessage()));
-            throw e;
-        }
+        if (amount > balance)
+            throw new InsufficientFundsException(balance, amount);
         account.withdraw(amount);
         accountRepo.save(account);
-        transactionRepo
-                .save(new Transaction(account, null, null, amount, Status.SUCCESS, TransactionType.WITHDRAW, null));
+        transactionRepo.save(
+                Transaction.builder()
+                        .fromAccount(account)
+                        .amount(amount)
+                        .type(TransactionType.WITHDRAW)
+                        .build());
         return new BalanceDto(account.getBalance());
     }
 
@@ -128,38 +131,64 @@ public class AccountServiceImpl implements IAccountService {
     public BalanceDto transfer(Long fromAccountId, TransferDto transferDto) {
         Account fromAccount = doSecurityChecksAndExtractAccount(fromAccountId);
         String toAccountNumber = transferDto.toAccountNumber();
+        Double balance = fromAccount.getBalance();
+        Double amount = transferDto.amount();
 
-        if (toAccountNumber.startsWith(bankCode)) {
+        if (balance < amount)
+            throw new InsufficientFundsException(balance, amount);
+
+        String bankId = toAccountNumber.split("_")[0];
+        BankWhitelist whiteListBankRecord = whitelistRepo.findById(bankId)
+                .orElseThrow(() -> new InvalidIdException("Unknown bank identifier of " + bankId));
+
+        if (whiteListBankRecord.getBankId().equals(bankCode)) {
             Account toAccount = null;
-            Double balance = fromAccount.getBalance();
-            Double amount = transferDto.amount();
+
+            if (fromAccount.getAccountNumber().equals(toAccountNumber))
+                throw new InvalidIdException("Transfers to the same account (to yourself) is not allowed");
+
+            toAccount = accountRepo.findByAccountNumber(toAccountNumber)
+                    .orElseThrow(() -> new InvalidToAcountNumber(
+                            "There is no account with such toAccountNumber of " + toAccountNumber));
+            fromAccount.withdraw(amount);
+            toAccount.deposit(amount);
+            accountRepo.saveAll(Arrays.asList(fromAccount, toAccount));
+
+            transactionRepo.save(Transaction.builder()
+                    .fromAccount(fromAccount)
+                    .toAccount(toAccount)
+                    .amount(amount)
+                    .type(TransactionType.TRANSFER)
+                    .build());
+            return new BalanceDto(fromAccount.getBalance());
+        } else {
+            RestTemplate restTemplate = new RestTemplate();
+            String url = "http://" + whiteListBankRecord.getUrlDomain() + "/api/v1/accounts/transfer/external";
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            Map<String, Object> requestBody = new HashMap<>();
+            requestBody.put("fromAccountNumber", fromAccount.getAccountNumber());
+            requestBody.put("toAccountNumber", toAccountNumber);
+            requestBody.put("amount", amount);
+
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
             try {
-                if (fromAccount.getAccountNumber().equals(toAccountNumber))
-                    throw new InvalidIdException("Transfers to the same account (to yourself) is not allowed");
-
-                if (balance < amount)
-                    throw new InsufficientFundsException(balance, amount);
-
-                toAccount = accountRepo.findByAccountNumber(toAccountNumber)
-                        .orElseThrow(() -> new InvalidToAcountNumber(
-                                "There is no account with such toAccountNumber of " + toAccountNumber));
-                fromAccount.withdraw(amount);
-                toAccount.deposit(amount);
-                accountRepo.saveAll(Arrays.asList(fromAccount, toAccount));
-                transactionRepo
-                        .save(new Transaction(fromAccount, null, toAccount, amount, Status.SUCCESS,
-                                TransactionType.TRANSFER,
-                                null));
+                ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+                // Needs additional logic here but i njeed to check the response structure first
+                System.out.println("RESPONSE FROM THE EXTERNAL SYSTEM: " + response.getBody());
+                transactionRepo.save(Transaction.builder()
+                        .fromAccount(fromAccount)
+                        .externalToAccountNumber(toAccountNumber)
+                        .amount(amount)
+                        .type(TransactionType.TRANSFER)
+                        .build());
                 return new BalanceDto(fromAccount.getBalance());
             } catch (Exception e) {
-                transactionRepo
-                        .save(new Transaction(fromAccount, null, toAccount, amount, Status.FAILURE,
-                                TransactionType.TRANSFER,
-                                null));
-                throw e;
+                System.out.println(e.getMessage());
+                throw new FailedTransactionException();
             }
-        } else {
-            throw new FeatureNotAvailableException("Transfers to another banks feature is being developed...");
         }
     }
 
@@ -194,36 +223,28 @@ public class AccountServiceImpl implements IAccountService {
          * Response (particularly error) messages could be a bit more specific, but we
          * have decided to keep endpoints simple:
          * "Transaction was successfull" and "Transaction failed"
-         * 
-         * Also, later I will add the allowed bank identifiers to a DB, but for now,
-         * since I do not have them in hand, I will simply use a hard coded list that I
-         * will be populating as we go with the bootcamp. And ocne it is complete - move
-         * it to a DB
          */
-        List<String> knownBankIdentifiers = new ArrayList<>(Arrays.asList("TSTBNK"));
 
         String fromAccountNumber = transferDto.fromAccountNumber();
         String toAccountNumber = transferDto.toAccountNumber();
         Double amount = transferDto.amount();
 
+        // string structure checked on a dto level so its safe to do here
+        String fromBankId = fromAccountNumber.split("_")[0];
+        if (!whitelistRepo.existsById(fromBankId))
+            new InvalidIdException("Unknown bank identifier of " + fromBankId);
+
         Account targetAccount = accountRepo.findByAccountNumber(toAccountNumber)
                 .orElseThrow(() -> new FailedTransactionException());
 
-        // string structure checked on a dto level so its safe to do here
-        String fromBankId = fromAccountNumber.split("_")[0];
-        if (!knownBankIdentifiers.contains(fromBankId)) {
-            transactionRepo
-                    .save(new Transaction(null, fromAccountNumber, targetAccount, amount, Status.FAILURE,
-                            TransactionType.TRANSFER, "Unknown bank identifier."));
-            throw new FailedTransactionException();
-        }
-
         targetAccount.deposit(amount);
         accountRepo.save(targetAccount);
-        transactionRepo
-                .save(new Transaction(null, fromAccountNumber, targetAccount, amount, Status.SUCCESS,
-                        TransactionType.TRANSFER, null));
-
+        transactionRepo.save(Transaction.builder()
+                .externalFromAccountNumber(fromAccountNumber)
+                .toAccount(targetAccount)
+                .amount(amount)
+                .type(TransactionType.TRANSFER)
+                .build());
         return new TransactionSucessDto();
     }
 

@@ -46,8 +46,6 @@ public class TransactionServiceImpl implements ITransactionService {
                         transaction.getToAccount() != null ? transaction.getToAccount().getAccountNumber() : null,
                         transaction.getAmount(),
                         transaction.getTransactionDateTime(),
-                        transaction.getStatus(),
-                        transaction.getErrorMessage(),
                         transaction.getType()))
                 .toList();
     }
