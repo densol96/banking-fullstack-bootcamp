@@ -42,12 +42,13 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration config = new CorsConfiguration();
                     config.setAllowedOrigins(
-                            Arrays.asList("http://accenture-banking-frontend.s3-website.eu-north-1.amazonaws.com",
-                                    "http://localhost:3000"));
+                            Arrays.asList("*")); // "http://accenture-banking-frontend.s3-website.eu-north-1.amazonaws.com",
+                                                 // "http://localhost:3000"
+
                     config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE",
                             "OPTIONS"));
                     config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
-                    config.setAllowCredentials(true);
+                    config.setAllowCredentials(false);
                     return config;
                 }))
                 .authorizeHttpRequests(request -> request

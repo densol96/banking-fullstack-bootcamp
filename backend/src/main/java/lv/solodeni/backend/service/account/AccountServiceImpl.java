@@ -6,7 +6,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.*;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -150,6 +154,7 @@ public class AccountServiceImpl implements IAccountService {
             toAccount = accountRepo.findByAccountNumber(toAccountNumber)
                     .orElseThrow(() -> new InvalidToAcountNumber(
                             "There is no account with such toAccountNumber of " + toAccountNumber));
+
             fromAccount.withdraw(amount);
             toAccount.deposit(amount);
             accountRepo.saveAll(Arrays.asList(fromAccount, toAccount));
@@ -162,22 +167,11 @@ public class AccountServiceImpl implements IAccountService {
                     .build());
             return new BalanceDto(fromAccount.getBalance());
         } else {
-            RestTemplate restTemplate = new RestTemplate();
-            String url = "http://" + whiteListBankRecord.getUrlDomain() + "/api/v1/accounts/transfer/external";
+            if (makeExternalTransfer(fromAccount.getAccountNumber(), toAccountNumber, amount,
+                    whiteListBankRecord.getUrlDomain())) {
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-
-            Map<String, Object> requestBody = new HashMap<>();
-            requestBody.put("fromAccountNumber", fromAccount.getAccountNumber());
-            requestBody.put("toAccountNumber", toAccountNumber);
-            requestBody.put("amount", amount);
-
-            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
-            try {
-                ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
-                // Needs additional logic here but i njeed to check the response structure first
-                System.out.println("RESPONSE FROM THE EXTERNAL SYSTEM: " + response.getBody());
+                fromAccount.withdraw(amount);
+                accountRepo.save(fromAccount);
                 transactionRepo.save(Transaction.builder()
                         .fromAccount(fromAccount)
                         .externalToAccountNumber(toAccountNumber)
@@ -185,10 +179,41 @@ public class AccountServiceImpl implements IAccountService {
                         .type(TransactionType.TRANSFER)
                         .build());
                 return new BalanceDto(fromAccount.getBalance());
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
+            } else {
                 throw new FailedTransactionException();
             }
+        }
+    }
+
+    private boolean makeExternalTransfer(String fromAccountNumber, String toAccountNumber, Double amount,
+            String domainName) {
+        RestTemplate restTemplate = new RestTemplate();
+        String url = domainName + "/api/v1/accounts/transfer/external";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("fromAccountNumber", fromAccountNumber);
+        requestBody.put("toAccountNumber", toAccountNumber);
+        requestBody.put("amount", amount);
+
+        HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
+
+        try {
+            ResponseEntity<JsonNode> response = restTemplate.postForEntity(url, request,
+                    JsonNode.class);
+
+            System.out.println("RESPONSE FROM THE EXTERNAL SYSTEM: "
+                    + response.getBody().get("message").asText());
+
+            return true;
+        } catch (HttpClientErrorException | HttpServerErrorException e) {
+            System.out.println("transfer-external === Http* Error => " + e.getMessage());
+            throw new FailedTransactionException();
+        } catch (Exception e) {
+            System.out.println("transfer-external === UNEXPECTED ERROR");
+            throw new FailedTransactionException();
         }
     }
 
@@ -231,20 +256,22 @@ public class AccountServiceImpl implements IAccountService {
 
         // string structure checked on a dto level so its safe to do here
         String fromBankId = fromAccountNumber.split("_")[0];
+
         if (!whitelistRepo.existsById(fromBankId))
-            new InvalidIdException("Unknown bank identifier of " + fromBankId);
+            throw new InvalidIdException("Unknown bank identifier of " + fromBankId);
 
         Account targetAccount = accountRepo.findByAccountNumber(toAccountNumber)
                 .orElseThrow(() -> new FailedTransactionException());
 
         targetAccount.deposit(amount);
         accountRepo.save(targetAccount);
-        transactionRepo.save(Transaction.builder()
-                .externalFromAccountNumber(fromAccountNumber)
-                .toAccount(targetAccount)
-                .amount(amount)
-                .type(TransactionType.TRANSFER)
-                .build());
+        transactionRepo.save(
+                Transaction.builder()
+                        .externalFromAccountNumber(fromAccountNumber)
+                        .toAccount(targetAccount)
+                        .amount(amount)
+                        .type(TransactionType.TRANSFER)
+                        .build());
         return new TransactionSucessDto();
     }
 
